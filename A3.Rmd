@@ -1,0 +1,139 @@
+---
+title: "A3"
+author: "Peter Omasta"
+date: "5/6/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(janitor)
+
+```
+
+```{r}
+#read in data file
+
+data <- read_csv("Homework 3 Data.csv") %>% 
+  clean_names()
+
+```
+
+## 1) 
+
+```{r}
+#create the models for graphing and setting up the demand curves
+agg_lm <- lm(price_dollars ~ q_agg, data = data)
+low_lm <- lm(price_dollars ~ q_low_gallons, data = data)
+high_lm <- lm(price_dollars ~ q_high_gallons, data = data)
+
+#run analysis to see the slope and intercept
+summary(agg_lm)
+#p = 15.00 - 0.0000204q
+summary(low_lm)
+#p = 11.69 - 0.0000661q
+summary(high_lm)
+#p = 15.80 - 0.0000273q
+
+## Save them as equations and functions to graph
+
+eqagg = function(x){15.00 - 0.0000204*x}
+eqlow = function(x){11.69 - 0.0000661*x}
+eqhigh = function(x){15.80 - 0.0000273*x}
+supply = function(x){0 + 0.0000051*x}
+```
+
+```{r}
+#plot them out
+fig1 <- ggplot(data.frame(x = c(1,700000)), aes(x=x)) +
+  stat_function(fun=eqagg, aes(color = "Aggregate"), size = 1.2, alpha = 0.8) +
+  stat_function(fun=eqlow, aes(color = "Low Demand"), size = 1.2, alpha = 0.8) +
+  stat_function(fun=eqhigh, aes(color = "High Demand"), size = 1.2, alpha = 0.8) +
+  stat_function(fun=supply, aes(color = "Supply Curve"), size = 1.2, alpha = 0.8) +
+  geom_segment(aes(x=0, y = 3, xend = 588235, yend = 3), 
+                linetype ="dashed", color = "black") +
+  geom_segment(aes(x = 588235, y = 0, xend = 588235, yend = 3), color = "black",
+               linetype = "dashed") +
+  geom_segment(aes(x=0, y = 0.50, xend = 800000, yend = 0.50), 
+                linetype ="dashed", color = "dodgerblue") +
+  geom_segment(aes(x=0, y = 1.50, xend = 800000, yend = 1.50), 
+                linetype ="dashed", color = "forestgreen") +
+  labs(x = "Gallons of Gas",
+       y = "Price ($) per Gallon",
+       title = "Figure 1: Gas Demand",
+       color = "Sector",
+       caption = "Figure 1: ") +
+  theme_classic() +
+  scale_x_continuous(lim=c(0, 800000), expand = c(0,0)) +
+  scale_y_continuous(lim=c(0,16), expand = c(0,0))+
+  geom_text(label = "Marginal Social Cost", x = 300000, y = 1.75, color = "forestgreen") +
+  geom_text(label = "Marginal Global Cost", x = 300000, y = 0.75, color = "dodgerblue") +
+  geom_text(label = "Current Price", x = 300000, y =3.25, color = "Black") +
+  theme(plot.caption= element_text(hjust = 0))
+  
+fig1
+ggsave("fig1.jpg", height = 3.5, width = 3.5, units = "in", scale = 2)
+```
+
+### Question 1 
+The Demand Curve is p = 15.00 - 0.0000204q
+The Supply Curve is p = 0.0000051q
+The consumer benefit is ((15-12) * 588,235)) * 0.5 = 3529410
+Producer benefit is ((3 * 588,235) * 0.5) = 882352.5
+Local Env Cost = (2 * 588,235) = 1,176,470
+Global Env Cost = (0.5 * 588,235) = 0.5*588235 = 294,117.50
+
+### Question 2 
+The current benefit is divided disproportionately between the high and low income users. The high demand users have a 
+ 
+### Question 3 
+```{r}
+#come up with a new equation for the new $ per gallon tax 
+taxs = function(x){1 + 0.0000051 * x}
+
+```
+
+A) The Amount of Gasoline Produced and consumed is 549019 Gallons at a 
+B) Price of $3.80 per gallon
+
+```{r}
+fig2 <- ggplot(data.frame(x = c(1,700000)), aes(x=x)) +
+  stat_function(fun=eqagg, aes(color = "Aggregate"), size = 1.2, alpha = 0.8) +
+  stat_function(fun=eqlow, aes(color = "Low Demand"), size = 1.2, alpha = 0.8) +
+  stat_function(fun=eqhigh, aes(color = "High Demand"), size = 1.2, alpha = 0.8) +
+  stat_function(fun=taxs, aes(color = "Supply Curve with Tax"), size = 1.2, alpha = 0.8) +
+  geom_segment(aes(x=0, y = 3.80, xend = 549019, yend = 3.80), 
+                linetype ="dashed", color = "black") +
+  geom_segment(aes(x = 549019, y = 0, xend = 549019, yend = 3.80), color = "black",
+               linetype = "dashed") +
+  geom_segment(aes(x=0, y = 0.50, xend = 800000, yend = 0.50), 
+                linetype ="dashed", color = "dodgerblue") +
+  geom_segment(aes(x=0, y = 1.50, xend = 800000, yend = 1.50), 
+                linetype ="dashed", color = "forestgreen") +
+  labs(x = "Gallons of Gas",
+       y = "Price ($) per Gallon",
+       title = "Figure 2: Gas Demand With Tax",
+       color = "Sector",
+       caption = "Figure 2: ") +
+  theme_classic() +
+  scale_x_continuous(lim=c(0, 800000), expand = c(0,0)) +
+  scale_y_continuous(lim=c(0,16), expand = c(0,0))+
+  geom_text(label = "Marginal Social Cost", x = 300000, y = 1.75, color = "forestgreen") +
+  geom_text(label = "Marginal Global Cost", x = 300000, y = 0.75, color = "dodgerblue") +
+  geom_text(label = "Current Price", x = 300000, y =3.25, color = "Black") +
+  theme(plot.caption= element_text(hjust = 0))
+
+fig2
+```
+
+
+C) 
+
+
+
+
+
+
+
